@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>Danh sách sản phẩm</h1>
+<button onclick="findAll()">Hiện dữ liệu</button>
+<button onclick="showAddForm()">Thêm mới sản phẩm </button>
+
+<div id="display">
+
+
+</div>
+
+<script>
+
+    let show = document.getElementById("display")
+    function findAll() {
+        let str = ""
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8011/api/products",
+            success: function (data1) {
+                console.log(data1)
+                for (let i=0; i<data1.length; i++) {
+                    str += `<h1> ${data1[i].name} ,  ${data1[i].price} , ${data1[i].quantity} ,${data1[i].category.name}`
+                }
+                show.innerHTML = str;
+            }, error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function showAddForm() {
+        let str = ""
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8011/api/categorys",
+            success: function (cate) {
+                console.log(cate)
+                str = "  <input type=\"text\" id=\"name\" >\n" +
+                    "    <input type=\"number\" id=\"price\">\n" +
+                    "    <input type=\"number\" id=\"quantity\">\n" +
+                    "<select id='category'>"
+                for (let i=0; i<cate.length; i++) {
+                    str += "<option value='" + cate[i].id + "' >" + cate[i].name + "</option>"
+                }
+                str += "</select>" +
+                    "    <button onclick=\"save()\">Thêm</button>" +
+                "<p id=\"valiName\"></p>" +
+                "<p id=\"valiPrice\"></p>" +
+                "<p id=\"valiQuantity\"></p>"
+                show.innerHTML = str;
+            }, error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function save() {
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let quantity = document.getElementById("quantity").value;
+        let categoryId = document.getElementById("category").value;
+        let valiName1 = document.getElementById("valiName")
+        let valiPrice = document.getElementById("valiPrice")
+        let valiQuantity = document.getElementById("valiQuantity")
+        let pro = {
+            name:name,
+            price:price,
+            quantity: quantity,
+            category: {
+                id:categoryId
+            }
+        }
+
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            type: 'POST',
+            url: 'http://localhost:8011/api/products',
+            data: JSON.stringify(pro),
+            success: function () {
+                findAll()
+            },
+            error: function (error) {
+                console.log(error.responseJSON.name)
+                valiName1.innerText=error.responseJSON.name
+                valiPrice.innerText=error.responseJSON.price
+                valiQuantity.innerText=error.responseJSON.quantity
+            }
+        })
+    }
+
+
+
+
+
+
+</script>
+</body>
+</html>
